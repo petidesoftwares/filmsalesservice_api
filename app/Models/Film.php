@@ -8,4 +8,18 @@ use Illuminate\Database\Eloquent\Model;
 class Film extends Model
 {
     use HasFactory;
+
+    public $timestamps = true;
+
+    protected $fillable = [
+        'title',
+        'genre',
+        'price',
+        'available_pcs',
+        'product'
+    ];
+
+    public function getFilmsCart(){
+        return $this->hasMany('App\Model\Cart','film_id','id');
+    }
 }

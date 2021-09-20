@@ -8,4 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Cart extends Model
 {
     use HasFactory;
+    public $timestamps = true;
+
+    protected $fillable = [
+        'customer_id',
+        'film_id'
+    ];
 }
