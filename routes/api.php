@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\v1\CustomerController;
+use App\Http\Controllers\v1\FilmController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +16,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::post('/create-user', [CustomerController::class, 'store']);
+Route::post('/create-film',[FilmController::class,'store']);
+Route::post('/edit-film/{id}', [FilmController::class,'update']);
+Route::post('/edit/resource/{id}', [FilmController::class,'edit']);
+Route::post('/view/film/{id}', [FilmController::class,'show']);

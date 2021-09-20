@@ -13,13 +13,17 @@ class Film extends Model
 
     protected $fillable = [
         'title',
-        'genre',
+        'video',
         'price',
-        'available_pcs',
+        'available_cps',
         'product'
     ];
 
     public function getFilmsCart(){
         return $this->hasMany('App\Model\Cart','film_id','id');
+    }
+
+    public function getGenre(){
+        return $this->hasMany('App\Model\Genre', 'film_id','id');
     }
 }

@@ -18,6 +18,7 @@ class CreateCustomersTable extends Migration
             $table->string('firstname',50);
             $table->string('middle_name',50)->nullable();
             $table->string('surname',50);
+            $table->enum('gender',['Male', 'Female']);
             $table->string('email',50)->unique();
             $table->string('dob',10);
             $table->string('phone',15);
