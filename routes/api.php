@@ -18,7 +18,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('/create-user', [CustomerController::class, 'store']);
-Route::post('/edit/user/{id}', [CustomerController::class, 'update']);
 Route::get('/edit/data/{id}', [CustomerController::class, 'edit']);
 Route::post('/create-film',[FilmController::class,'store']);
 Route::post('/edit-film/{id}', [FilmController::class,'update']);
@@ -29,5 +28,6 @@ Route::get('/customer/{age}',[CustomerController::class,'getCustomerByAge']);
 
 Route::post('/login',[CustomerAuthController::class,'login']);
 Route::group(['prefix'=>'user','middleware'=>['assign.guard:customers', 'jwt.auth']], function (){
+    Route::post('/edit/{id}', [CustomerController::class, 'update']);
     Route::post('/logout',[CustomerAuthController::class,'logout']);
 });

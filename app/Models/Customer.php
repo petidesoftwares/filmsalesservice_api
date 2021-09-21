@@ -25,6 +25,10 @@ class Customer extends Authenticatable implements JWTSubject
         'password'
     ];
 
+    /**
+     * Hidden attributes
+     * @var string[]
+     */
     protected $hidden = [
         'password', 'deleted_at'
     ];
@@ -51,6 +55,10 @@ class Customer extends Authenticatable implements JWTSubject
      */
     public function getCustomerCarts(){
         return $this->hasMany('App\Model\Cart','customer_id','id');
+    }
+
+    public function getCreditCard(){
+        return $this->hasMany('App\Models\CreditCard','customer_id','id');
     }
 
     /**

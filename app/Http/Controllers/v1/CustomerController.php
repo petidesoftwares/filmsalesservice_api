@@ -141,10 +141,11 @@ class CustomerController extends Controller
      */
     public function update(Request $request, $id)
     {
-//        $hash = Customer::where('id',$id)->get('email','password');
-//        if(!Hash::check($request->input('password'),$hash->password )){
-//            return response()->json(['error'=>'Unauthorized Update. Password provided not match yours']);
-//        }
+        $customer = auth()->user();
+        $hash = Customer::where('id',$customer)->get(['email','password']);
+        if(!Hash::check($request->password,$hash->password )){
+            return response()->json(['error'=>'Unauthorized Update. Password provided not match yours']);
+        }
         $inputData = [
             'firstname' => $request->input('firstname'),
             'middle_name' => $request->input('middle_name'),
