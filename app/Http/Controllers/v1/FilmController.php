@@ -4,6 +4,7 @@ namespace App\Http\Controllers\v1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Film;
+use App\Models\Genre;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -37,48 +38,68 @@ class FilmController extends Controller
      */
     public function store(Request $request)
     {
+        $video = $request->file('video');
+        $request->validate([
+            'video'=>[
+                'required', 'mimes:mp4,x-flv,x-mpegURL,MP2T,3gpp,quicktime,x-msvideo,x-ms-wmv'
+            ]
+        ]);
+
         $inputData = [
-            'title'=>$request->input('title'),
-            'video' => $request->file('video'),
             'price' => $request->input('price'),
             'available_cps' => $request->input('available_cps'),
-            'product' => $request->input('product')
+            'product' => $request->input('product'),
+            'genre' => $request->input('genre')
         ];
 
         /**
          * Make a validation rule that validates user input.
          */
         $validate = Validator::make($inputData,[
-            'title' =>'required',
-            'video'=>'required|mimes:mp4,x-flv,x-mpegURL,MP2T,3gpp,quicktime,x-msvideo,x-ms-wmv',
             'price'=>'required|max:10|min:4',
             'available_cps' => 'required',
-            'product' => 'required'
+            'product' => 'required',
+            'genre' => 'required'
         ],[
-            'title.required' =>'Tile field is required',
-            'video.required' => 'Video field is required',
-            'video.mimes' => 'Upload a valid video format',
             'price.required' =>'Price field is required',
             'price.max' => 'Price must not be more than 10 digits in decimal format',
             'price.min' => 'Price must not be less than 4 digits in a decimal format',
             'available_cps.required' => 'Available copies is required',
-            'product.require' => 'Movie product is required'
+            'product.require' => 'Movie product is required',
+            'genre.require' => 'Movie genre is required'
         ]);
         $validate->validate();
 
+        $filmName = $video->getClientOriginalName();
+        $path = public_path().'videos/';
+        $inputData['video']->move($path,$filmName);
+
+        $storageData = [
+            'title'=>$filmName,
+            'location'=>$path,
+            'price'=>$inputData['price'],
+            'available_cps'=>$inputData['available_cps'],
+            'product' => $inputData['product']
+        ];
         $film = Film::create($inputData);
 
-        return response()->json(['message'=>'Film successfully created', 'film'=>$film]);
-    }
+        if(!is_array($inputData['genre'])){
+            $genre = [
+                'film_id' => $film->id,
+                'genre'=>$inputData['genre']
+            ];
+            Genre::create($genre);
+        }
+        foreach ($inputData['genre'] as $key =>$datum){
+            $genre = [
+                'film_id' => $film->id,
+                'genre'=>$datum
+            ];
+            Genre::create($genre);
+        }
+        $respData = Film::where('id',$film)-with('genre')->get();
 
-    /**
-     * @param Request $request
-     * @param $id
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \Illuminate\Validation\ValidationException
-     */
-    public function editFilm(Request $request, $id){
-
+        return response()->json(['message'=>'Film successfully created', 'film'=>$respData]);
     }
 
     /**
@@ -145,6 +166,7 @@ class FilmController extends Controller
 
         return response()->json(['message'=>'Film successfully edited', 'film'=>$updater]);
     }
+
 
     /**
      * Remove the specified resource from storage.

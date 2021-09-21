@@ -23,6 +23,7 @@ class CreateCustomersTable extends Migration
             $table->string('dob',10);
             $table->string('phone',15);
             $table->string('password',150);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

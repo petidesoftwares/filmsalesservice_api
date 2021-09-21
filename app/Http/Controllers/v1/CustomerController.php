@@ -4,6 +4,7 @@ namespace App\Http\Controllers\v1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -18,6 +19,12 @@ class CustomerController extends Controller
     public function index()
     {
         //
+    }
+
+    public function getCustomerByAge($age){
+        $dob = Carbon::now()->subYear($age);
+        $custromers = Customer::where('dob','<',$dob->format('d/m/Y'))->get();
+        return response()->json(['customer'=>$custromers]);
     }
 
     /**
@@ -121,7 +128,8 @@ class CustomerController extends Controller
      */
     public function edit($id)
     {
-        //
+        $data = Customer::where('id',$id)->get();
+        return response()->json(['data'=>$data]);
     }
 
     /**
@@ -133,7 +141,55 @@ class CustomerController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+//        $hash = Customer::where('id',$id)->get('email','password');
+//        if(!Hash::check($request->input('password'),$hash->password )){
+//            return response()->json(['error'=>'Unauthorized Update. Password provided not match yours']);
+//        }
+        $inputData = [
+            'firstname' => $request->input('firstname'),
+            'middle_name' => $request->input('middle_name'),
+            'surname' => $request->input('surname'),
+            'gender' => $request->input('gender'),
+            'dob' => $request->input('date_of_birth'),
+            'phone' => $request->input('phone_number'),
+        ];
+
+        $vaildate = Validator::make($inputData,[
+            'firstname' => 'required|max:50|min:2',
+            'surname' => 'required|max:50|min:2',
+            'gender'=> ['required', 'regex:/^(Male)|(Female)$/'],
+            'dob' =>'required|max:10|min:10',
+            'phone'=>'required|max:15|min:10',
+        ],[
+            'firstname.required' => 'First name is required for registration',
+            'firstname.max' => 'First name must not be lest than 2 characters',
+            'firstname.min' => 'First name must not be more than 50 characters',
+            'surname.required' => 'Surname is required for registration',
+            'surname.max' => 'Surname must not be lest than 2 characters',
+            'surname.min' => 'Surname must not be more than 50 characters',
+            'gender.required' => 'Customer gender is required for registration',
+            'gender.regex' => 'Gender format mut be Male or Female',
+            'dob.required' => 'Date of birth is required for registration',
+            'dob.max' => 'Date of birth must be exactly 10 characters',
+            'dob.min' => 'Date of birth must be exactly 10 characters',
+            'phone.required' => 'Phone number is required',
+            'phone.max' => 'Phone number must not be more than 15 digits',
+            'phone.min' => 'Phone number must not be less than 10 digits',
+        ]);
+
+        $vaildate->validate();
+
+        $storageData =[
+            'firstname' => $inputData['firstname'],
+            'middle_name' => $inputData['middle_name'],
+            'surname' => $inputData['surname'],
+            'gender' => $inputData['gender'],
+            'dob' => $inputData['dob'],
+            'phone' => $inputData['phone']
+        ];
+        Customer::where('id',$id)->update($storageData);
+        $update = Customer::where('id',$id)->get();
+        return response()->json(['message'=>'Update Successful','data'=>$update]);
     }
 
     /**

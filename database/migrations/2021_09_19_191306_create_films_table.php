@@ -20,6 +20,7 @@ class  CreateFilmsTable extends Migration
             $table->decimal('price',10,2)->default(0.00);
             $table->unsignedBigInteger('available_cps',5)->default(0)->autoIncrement(false);
             $table->string('product',100)->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
