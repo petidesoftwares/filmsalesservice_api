@@ -115,7 +115,7 @@ class CreditCardController extends Controller
         $validate = Validator::make($inputData,[
             'bank_name' => 'required',
             'card_type' => 'required',
-            'card_number' => 'required|unique:credit_cards,card_number',
+            'card_number' => 'required',
             'cvv' => 'required',
             'expiry_date' =>'required'
         ]);
