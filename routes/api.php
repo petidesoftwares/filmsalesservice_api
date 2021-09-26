@@ -35,6 +35,7 @@ Route::group(['prefix'=>'admin'],function(){
     Route::get('/product/{char}', [FilmController::class,'getProductByChar']);
 
     Route::get('/customer/{age}',[CustomerController::class,'getCustomerByAge']);
+    Route::get('/customers',[CustomerController::class,'index'])
 
     Route::get('/purchase/{id}',[CustomerController::class,'customerTotalPurchase']);
     Route::get('/sales/{month}',[CustomerController::class,'monthlySales']);
