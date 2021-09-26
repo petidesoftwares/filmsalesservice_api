@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\v1;
 
 use App\Http\Controllers\Controller;
+use App\Models\CreditCard;
 use App\Models\Customer;
+use App\Models\Orders;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -24,7 +26,9 @@ class CustomerController extends Controller
     public function getCustomerByAge($age){
         $dob = Carbon::now()->subYear($age);
         $custromers = Customer::where('dob','<',$dob->format('d/m/Y'))->get();
-        return response()->json(['customer'=>$custromers]);
+        return response()->json([
+            'status'=>200,
+            'customer'=>$custromers]);
     }
 
     /**
@@ -91,7 +95,7 @@ class CustomerController extends Controller
         $vaildate->validate();
 
         if(!Hash::check($inputData['confirm_password'], $inputData['password'])){
-            return response()->json(['error' => 'Password confirmation failed']);
+            return response()->json(['status'=>401,'error' => 'Password confirmation failed']);
         }
         $storageData =[
             'firstname' => $inputData['firstname'],
@@ -106,7 +110,54 @@ class CustomerController extends Controller
 
        $customer =  Customer::create($storageData);
 
-       return response()->json(['message'=>'Customer successfully created', 'customer'=>$customer]);
+       return response()->json(['status'=>200,
+           'message'=>'Customer successfully created',
+           'customer'=>$customer]);
+    }
+
+    /**
+     * Customer to make payment for an order placed.
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function makePayment(Request $request)
+    {
+        $inputData = [
+            'customer_id' =>$request->input('customer_id'),
+            'card_number' => $request->input('card_id'),
+            'amount' => $request->input('amount'),
+            'shopping_id'=>$request->input('shopping_id')
+        ];
+
+        $getCardID =  CreditCard::where('customer_id',$inputData['customer_id'])->get('card_number');
+        if($getCardID == $inputData['card_number']){
+            Orders::where(['customer_id',$inputData['customer_id'],'shopping_id'=>$inputData['shopping_id']])->update(['payment_status'=>'Paid']);
+            return response()->json([
+                'status'=>200,
+                'paymentStatus'=>'Payment Successful'
+            ]);
+        }
+        return response()->json([
+            'status'=>200,
+            'paymentStatus'=>'Payment unsuccessful. Credit card not registered.'
+        ]);
+    }
+
+    public function customerTotalPurchase($id){
+        $films = Orders::where('customer_id',$id)->sum('number_items');
+        return response()->json(['films'=>$films]);
+    }
+
+    public function monthlySales($month){
+        $films = Orders::where('created_at','like','%'.$month.'%')->sum('number_items');
+        $amount = Orders::where('created_at','like','%'.$month.'%')->sum('amount');
+        $monthlySales = [
+            'status'=>200,
+            'films'=>$films,
+            'amount'=>$amount
+        ];
+        return response()->json([
+            'sales'=>$monthlySales]);
     }
 
     /**
@@ -117,7 +168,11 @@ class CustomerController extends Controller
      */
     public function show($id)
     {
-        //
+        $data = Customer::where('id',$id)->get();
+        return response()->json([
+            'status'=>200,
+            'data'=>$data
+        ]);
     }
 
     /**
@@ -128,8 +183,7 @@ class CustomerController extends Controller
      */
     public function edit($id)
     {
-        $data = Customer::where('id',$id)->get();
-        return response()->json(['data'=>$data]);
+
     }
 
     /**
@@ -141,11 +195,11 @@ class CustomerController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $customer = auth()->user();
-        $hash = Customer::where('id',$customer)->get(['email','password']);
-        if(!Hash::check($request->password,$hash->password )){
-            return response()->json(['error'=>'Unauthorized Update. Password provided not match yours']);
-        }
+//        $customer = auth()->user();
+//        $hash = Customer::where('id',$customer)->get(['email','password']);
+//        if(!Hash::check($request->password,$hash->password )){
+//            return response()->json(['error'=>'Unauthorized Update. Password provided not match yours']);
+//        }
         $inputData = [
             'firstname' => $request->input('firstname'),
             'middle_name' => $request->input('middle_name'),
@@ -190,7 +244,10 @@ class CustomerController extends Controller
         ];
         Customer::where('id',$id)->update($storageData);
         $update = Customer::where('id',$id)->get();
-        return response()->json(['message'=>'Update Successful','data'=>$update]);
+        return response()->json([
+            'status'=>200,
+            'message'=>'Update Successful',
+            'data'=>$update]);
     }
 
     /**

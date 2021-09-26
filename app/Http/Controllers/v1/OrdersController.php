@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\v1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Orders;
 use Illuminate\Http\Request;
 
 class OrdersController extends Controller
@@ -35,7 +36,28 @@ class OrdersController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $orderInput = [
+            'customer_id' =>$request->input('customer_id'),
+            'shopping_id' =>$request->input('shopping_id'),
+            'payment_status' =>$request->input('payment_status'),
+            'number_items' =>$request->input('number_items'),
+            'amount' =>$request->input('amount')
+        ];
+
+        $request->validate([
+            'customer_id' =>'required',
+            'shopping_id'=>'required',
+            'number_items' =>'required',
+            'amount'=>'required'
+        ]);
+
+        $order = Orders::create($orderInput);
+
+        return response()->json([
+            'status'=>200,
+            'message'=>'Order placed successfully',
+            'order'=>$order
+        ]);
     }
 
     /**

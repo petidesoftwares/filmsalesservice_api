@@ -23,11 +23,11 @@ class CreditCard extends Model
      * Hidden attributes
      * @var string[]
      */
-    protected $hidden=[
-        'card_number', 'cvv'
-    ];
+//    protected $hidden=[
+//        'card_number', 'cvv'
+//    ];
 
-    public function getCustomer(){
+    public function customer(){
         return $this->belongsTo('App\Models\Customer','customer_id','id');;
     }
 }

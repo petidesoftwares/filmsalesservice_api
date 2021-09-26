@@ -20,6 +20,14 @@ class CreditCardController extends Controller
         //
     }
 
+    function verifyIfUserHasCard($id){
+        $cardNumber = CreditCard::where('customer_id',$id)->get('card_number');
+        if (count($cardNumber) == 0){
+            return response()->json(['cardState'=>false]);
+        }
+        return response()->json(['cardState'=>true]);
+    }
+
     /**
      * Show the form for creating a new resource.
      *
@@ -47,10 +55,9 @@ class CreditCardController extends Controller
             'expiry_date' => $request->input('expiry_date')
         ];
         $validate = Validator::make($inputData,[
-            'customer_id' =>'required',
             'bank_name' => 'required',
             'card_type' => 'required',
-            'card_number' => 'required',
+            'card_number' => 'required|digits:16|unique:credit_cards,card_number',
             'cvv' => 'required',
             'expiry_date' =>'required'
         ]);
@@ -58,7 +65,10 @@ class CreditCardController extends Controller
         $validate->validate();
 
         $cardDetails = CreditCard::create($inputData);
-        return response()->json(['card' => $cardDetails]);
+        return response()->json([
+            'status'=>200,
+            'message'=>'Card successfully created',
+            'card' => $cardDetails]);
     }
 
     /**
@@ -69,6 +79,10 @@ class CreditCardController extends Controller
      */
     public function show($id)
     {
+        $cardDetails = CreditCard::where('customer_id',$id)->get();
+        return response()->json([
+            'status'=>200,
+            'cardDetails'=>$cardDetails]);
     }
 
     /**
@@ -101,7 +115,7 @@ class CreditCardController extends Controller
         $validate = Validator::make($inputData,[
             'bank_name' => 'required',
             'card_type' => 'required',
-            'card_number' => 'required',
+            'card_number' => 'required|unique:credit_cards,card_number',
             'cvv' => 'required',
             'expiry_date' =>'required'
         ]);

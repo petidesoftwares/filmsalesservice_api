@@ -17,6 +17,8 @@ class CreateCartsTable extends Migration
             $table->id();
             $table->unsignedBigInteger('customer_id');
             $table->unsignedBigInteger('film_id');
+            $table->string('shopping_id')->nullable(false);
+            $table->softDeletes();
             $table->timestamps();
 
             $table->foreign('customer_id')

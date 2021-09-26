@@ -16,9 +16,10 @@ class CreateOrdersTable extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('customer_id');
-            $table->unsignedBigInteger('cart_id');
-            $table->enum('payment_status',['Pending','Paid'])->nullable();
-            $table->unsignedInteger('number_orders',5)->autoIncrement(false);
+            $table->string('shopping_id')->nullable(false);
+            $table->enum('payment_status',['Pending','Paid'])->default('Pending');
+            $table->unsignedInteger('number_items',5)->autoIncrement(false);
+            $table->unsignedBigInteger('amount')->default(0.00);
             $table->softDeletes();
             $table->timestamps();
 
@@ -28,11 +29,6 @@ class CreateOrdersTable extends Migration
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
 
-            $table->foreign('cart_id')
-                ->references('id')
-                ->on('carts')
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
         });
     }
 

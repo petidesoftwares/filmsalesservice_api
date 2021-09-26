@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
-use App\Http\Controllers\v1\CustomerController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -21,6 +19,11 @@ class CustomerAuthController extends AppAuthController
 
     }
 
+    /**
+     * Customer login
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse|\Illuminate\Http\Response
+     */
     public function login(Request $request){
         $request->validate([
             'email'=>'required',

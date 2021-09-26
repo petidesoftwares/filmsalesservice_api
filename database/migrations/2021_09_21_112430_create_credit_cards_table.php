@@ -18,10 +18,16 @@ class CreateCreditCardsTable extends Migration
             $table->unsignedBigInteger('customer_id');
             $table->string('bank_name');
             $table->string('card_type',7);
-            $table->unsignedBigInteger('card_number',16)->autoIncrement(false);
+            $table->unsignedBigInteger('card_number',16)->unique()->autoIncrement(false);
             $table->unsignedBigInteger('cvv',3)->autoIncrement(false);
             $table->string('expiry_date',10);
             $table->timestamps();
+
+            $table->foreign('customer_id')
+                ->references('id')
+                ->on('customers')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
         });
     }
 

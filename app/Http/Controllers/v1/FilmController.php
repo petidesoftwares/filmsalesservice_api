@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Film;
 use App\Models\Genre;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class FilmController extends Controller
@@ -17,7 +18,27 @@ class FilmController extends Controller
      */
     public function index()
     {
-        //
+       return Film::all();
+    }
+
+    /**
+     * Get film based on a particular genre.
+     * @param $genre
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getFilmByGenre($genre){
+        $film =  Genre::where('genre',$genre)->with('film')->get();
+        return  response()->json(['film'=>$film]);
+    }
+
+    /**
+     * Search for product ending with a particular character
+     * @param $char
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getProductByChar($char){
+        $product = Film::where('product','like','%'.$char)->get('product');
+        return response()->json(['product'=>$product]);
     }
 
     /**
@@ -48,8 +69,15 @@ class FilmController extends Controller
         $inputData = [
             'price' => $request->input('price'),
             'available_cps' => $request->input('available_cps'),
-            'product' => $request->input('product'),
-            'genre' => $request->input('genre')
+            'product' => $request->input('product')
+        ];
+
+        $genres =[
+            'genre1' =>$request->input('genre1'),
+            'genre2' =>$request->input('genre2'),
+            'genre3' =>$request->input('genre3'),
+            'genre4' =>$request->input('genre4'),
+            'genre5' =>$request->input('genre5')
         ];
 
         /**
@@ -59,47 +87,43 @@ class FilmController extends Controller
             'price'=>'required|max:10|min:4',
             'available_cps' => 'required',
             'product' => 'required',
-            'genre' => 'required'
         ],[
             'price.required' =>'Price field is required',
             'price.max' => 'Price must not be more than 10 digits in decimal format',
             'price.min' => 'Price must not be less than 4 digits in a decimal format',
             'available_cps.required' => 'Available copies is required',
-            'product.require' => 'Movie product is required',
-            'genre.require' => 'Movie genre is required'
+            'product.require' => 'Movie product is required'
         ]);
         $validate->validate();
 
         $filmName = $video->getClientOriginalName();
-        $path = public_path().'videos/';
-        $inputData['video']->move($path,$filmName);
+        $path = $request->video->storeAs('public',$filmName);
+        $storagePath = Storage::url($filmName);
 
         $storageData = [
             'title'=>$filmName,
-            'location'=>$path,
+            'location'=>$storagePath,
             'price'=>$inputData['price'],
             'available_cps'=>$inputData['available_cps'],
             'product' => $inputData['product']
         ];
-        $film = Film::create($inputData);
+        $film = Film::create($storageData);
 
-        if(!is_array($inputData['genre'])){
-            $genre = [
-                'film_id' => $film->id,
-                'genre'=>$inputData['genre']
-            ];
-            Genre::create($genre);
+        foreach ($genres as $key=>$datum){
+            if($datum !="" || $datum != null){
+                $genre = [
+                    'film_id' => $film->id,
+                    'genre'=>$datum
+                ];
+                Genre::create($genre);
+            }
         }
-        foreach ($inputData['genre'] as $key =>$datum){
-            $genre = [
-                'film_id' => $film->id,
-                'genre'=>$datum
-            ];
-            Genre::create($genre);
-        }
-        $respData = Film::where('id',$film)-with('genre')->get();
+        $respData = Film::where('id',$film)->with('genre')->get();
 
-        return response()->json(['message'=>'Film successfully created', 'film'=>$respData]);
+        return response()->json([
+            'status'=>200,
+            'message'=>'Film successfully created', 'path' => $path,'spath'=>$storagePath
+            ]);
     }
 
     /**
@@ -121,7 +145,7 @@ class FilmController extends Controller
      */
     public function edit($id)
     {
-        $data = Film::findOrFail($id);
+        $data = Film::where('id',$id)->with('genre')->get();
         return response()->json(['data'=> $data]);
     }
 
@@ -135,36 +159,53 @@ class FilmController extends Controller
     public function update(Request $request, $id)
     {
         $inputData = [
-            'title' => $request->input('title'),
             'price' => $request->input('price'),
             'available_cps' => $request->input('available_cps'),
-            'product' => $request->input('product')
+            'product' => $request->input('product'),
+            'genre'=>$request->input('genre')
         ];
 
         /**
          * Make a validation rule that validates user input.
          */
         $validate =Validator::make($inputData,[
-            'title' =>'required',
             'price'=>'required|max:10|min:4',
             'available_cps' => 'required',
-            'product' => 'required'
+            'product' => 'required',
+            'genre' => 'required'
         ],[
-            'title.required' =>'Tile field is required',
             'price.required' =>'Price field is required',
             'price.max' => 'Price must not be more than 10 digits in decimal format',
             'price.min' => 'Price must not be less than 4 digits in a decimal format',
             'available_cps.required' => 'Available copies is required',
-            'product.require' => 'Movie product is required'
+            'product.required' => 'Movie product is required',
+            'genre.required' => 'Movie genre is required'
         ]);
 
         /**
          * Validate input
          */
         $validate->validate();
-        $updater = Film::where('id', $id)->update($inputData);
 
-        return response()->json(['message'=>'Film successfully edited', 'film'=>$updater]);
+        $updateData = [
+            'price'=>$inputData['price'],
+            'available_cps' =>$inputData['available_cps'],
+            'product' => $inputData['product']
+        ];
+        $updater = Film::where('id', $id)->update($updateData);
+        $genreData = explode('/',$inputData['genre']);
+        foreach ($genreData as $key=>$value){
+            if($value !=""){
+                Genre::updateOrCreate(
+                    ['film_id'=>$id,'genre'=>$value],
+                    ['genre'=>$value]
+                );
+            }
+        }
+
+        return response()->json([
+            'status'=>200,
+            'message'=>'Film successfully edited']);
     }
 
 
@@ -176,7 +217,8 @@ class FilmController extends Controller
      */
     public function destroy($id)
     {
-        Film::delete($id);
+        $film = Film::find($id);
+        $film->delete();
         return response()->json(['message'=>'Film deleted']);
     }
 }

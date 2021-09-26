@@ -53,12 +53,24 @@ class Customer extends Authenticatable implements JWTSubject
      * Get the cart associated to a customer by relationship
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function getCustomerCarts(){
+    public function carts(){
         return $this->hasMany('App\Model\Cart','customer_id','id');
     }
 
-    public function getCreditCard(){
+    /**
+     * Get the credit card of the customer
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function creditCard(){
         return $this->hasMany('App\Models\CreditCard','customer_id','id');
+    }
+
+    /**
+     * Get the customers orders
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function order(){
+        return $this->hasMany('App\Models\Order','customer_id','id');
     }
 
     /**

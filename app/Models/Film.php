@@ -13,17 +13,33 @@ class Film extends Model
 
     protected $fillable = [
         'title',
-        'video',
+        'location',
         'price',
         'available_cps',
         'product'
     ];
 
-    public function getFilmsCart(){
-        return $this->hasMany('App\Model\Cart','film_id','id');
+    /**
+     * Get the cart containing  the film
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function cart(){
+        return $this->hasMany('App\Models\Cart','film_id','id');
     }
 
-    public function getGenre(){
-        return $this->hasMany('App\Model\Genre', 'film_id','id');
+    /**
+     * Get the order of the film
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function order(){
+        return $this->hasMany('App\Models\Order','film_id','id');
+    }
+
+    /**
+     * Get the genre(s) of the file
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function genre(){
+        return $this->hasMany('App\Models\Genre', 'film_id','id');
     }
 }
