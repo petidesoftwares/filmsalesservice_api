@@ -130,9 +130,10 @@ class CreditCardController extends Controller
             'expiry_date' => $inputData['expiry_date']
         ];
 
-        $updateID = CreditCard::where('id',$id)->update($updateData);
+        $cardID = CreditCard::where('customer_id',$id)->get();
+        $updateID = CreditCard::where('id',$cardID)->update($updateData);
 
-        $details = CreditCard::where('id',$updateID)->get();
+        $details = CreditCard::where('id',$cardID)->get();
 
         return response()->json(['message'=>'Card details successfully updated','data'=>$updateData]);
 
