@@ -134,7 +134,7 @@ class CreditCardController extends Controller
 
         $details = CreditCard::where('id',$updateID)->get();
 
-        return response()->json(['message'=>'Card details successfully updated','data'=>$details]);
+        return response()->json(['message'=>'Card details successfully updated','data'=>$updateData]);
 
     }
 
