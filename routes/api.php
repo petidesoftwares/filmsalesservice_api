@@ -39,6 +39,7 @@ Route::group(['prefix'=>'admin'],function(){
 
     Route::get('/purchase/{id}',[CustomerController::class,'customerTotalPurchase']);
     Route::get('/sales/{month}',[CustomerController::class,'monthlySales']);
+    Route::get('/delete/film/{id}',[FilmController::class,'destroy']);
 
     Route::post('/logout',[AdminAuthController::class,'logout']);
 
