@@ -59,8 +59,7 @@ class CartController extends Controller
     }
 
     public function cartTotal($id){
-        $total = Cart::where('customer_id',$id)->count('film_id');
-//        $shoppingID = Cart::where('customer_id',$id)->where_is_null('deleted_at')->get();
+        $total = DB::select("SELECT count(film_id) total FROM carts WHERE customer_id =? AND deleted_at is null",[$id]);
         $shoppingID = DB::select("SELECT shopping_id FROM carts WHERE customer_id =? AND deleted_at is null",[$id]);
         return response()->json(['status'=>200,'cartSum'=>$total,'shoppingID'=>$shoppingID, 'messagge'=>'Item added to your cart']);
     }
@@ -108,10 +107,16 @@ class CartController extends Controller
         $customer_id = $request->get('customer_id');
         $shopping_id = $request->get('shopping_id');
 
-        $id = DB::select("SELECT id FROM carts WHERE customer_id = ? AND shopping_id =? LIMIT 1",[$customer_id, $shopping_id]);
-        $cart = Cart::find($id[0]->id);
-        $delete = $cart->delete();
-        return response()->json(['status'=>200,'deleted'=>$delete]);
+        $id = DB::select("SELECT id FROM carts WHERE customer_id = ? AND shopping_id =? AND deleted_at is null ",[$customer_id, $shopping_id]);
+        $deleted = false;
+        for ($i = 0; $i<count($id); $i++){
+            $cart = Cart::find($id[$i]->id);
+            $delete = $cart->delete();
+            if($delete == true || $deleted == 1){
+                $deleted = true;
+            }
+        }
+        return response()->json(['status'=>200,'deleted'=>$deleted]);
     }
 
     /**

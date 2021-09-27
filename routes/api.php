@@ -60,7 +60,7 @@ Route::group(['prefix'=>'user','middleware'=>['assign.guard:customers', 'jwt.aut
     Route::post('/create/cart',[CartController::class,'store']);
     Route::get('/all-cart/{id}', [CartController::class,'cartTotal']);
     Route::get('/show/cart/{id}',[CartController::class,'show']); //Show the content of the cart
-//    Route::delete('/cart/delete',[CartController::class,'clearCart']);
+    Route::post('/cart/delete',[CartController::class,'clearCart']);
 
     //Orders endpoints
     Route::post('/order', [OrdersController::class,'store']);
