@@ -124,22 +124,30 @@ class CustomerController extends Controller
     {
         $inputData = [
             'customer_id' =>$request->input('customer_id'),
-            'card_number' => $request->input('card_id'),
+            'card_number' => $request->input('card_number'),
             'amount' => $request->input('amount'),
             'shopping_id'=>$request->input('shopping_id')
         ];
+        $request->validate([
+            'customer_id' =>'required',
+            'card_number'=>'required',
+            'amount'=>'required',
+            'shopping_id'=>'required'
+        ]);
 
         $getCardID =  CreditCard::where('customer_id',$inputData['customer_id'])->get('card_number');
-        if($getCardID == $inputData['card_number']){
-            Orders::where(['customer_id',$inputData['customer_id'],'shopping_id'=>$inputData['shopping_id']])->update(['payment_status'=>'Paid']);
+        if($getCardID[0]->card_number == $inputData['card_number']){
+            Orders::where(['customer_id'=>$inputData['customer_id'],'shopping_id'=>$inputData['shopping_id']])->update(['payment_status'=>'Paid']);
             return response()->json([
                 'status'=>200,
-                'paymentStatus'=>'Payment Successful'
+                'message'=>'Payment Successful'
             ]);
         }
         return response()->json([
             'status'=>200,
-            'paymentStatus'=>'Payment unsuccessful. Credit card not registered.'
+            'message'=>'Payment unsuccessful. Credit card not registered.',
+            'card'=>$getCardID[0]->card_number,
+            'cardInput'=> $inputData['card_number']
         ]);
     }
 
@@ -171,6 +179,7 @@ class CustomerController extends Controller
         $data = Customer::where('id',$id)->get();
         return response()->json([
             'status'=>200,
+            'message'=>'Payment successful. Thanks for you patronage ',
             'data'=>$data
         ]);
     }

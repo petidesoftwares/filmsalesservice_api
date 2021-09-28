@@ -55,7 +55,7 @@ class CartController extends Controller
 
         Cart::create($cartInput);
         $cart = Cart::where('customer_id',$cartInput['customer_id'])->with('film')->get();
-        return response()->json(['message'=>'Film has been addedd to cart','cart'=>$cart]);
+        return response()->json(['status'=>200,'message'=>'Film has been added to cart','cart'=>$cart]);
     }
 
     public function cartTotal($id){

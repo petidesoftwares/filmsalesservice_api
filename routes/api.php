@@ -67,4 +67,4 @@ Route::group(['prefix'=>'user','middleware'=>['assign.guard:customers', 'jwt.aut
     Route::post('/order', [OrdersController::class,'store']);
     Route::post('/logout',[CustomerAuthController::class,'logout']);
 });
-Route::post('/cart/delete',[CartController::class,'clearCart']);
+//Route::post('/payment',[CustomerController::class,'makePayment']);
